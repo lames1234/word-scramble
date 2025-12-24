@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>لعبة الحروف للأطفال</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff79c6">
+</head>
+<body class="bg-gradient-to-br from-pink-400 via-purple-300 to-yellow-200">
+<div id="root" class="flex items-center justify-center min-h-screen p-4"></div>
+
+<!-- صوت التصفيق -->
+<audio id="win-sound" src="https://www.soundjay.com/human/applause-8.mp3" preload="auto"></audio>
+
+<script type="text/javascript">
+const { useState, useEffect } = React;
+
+function
