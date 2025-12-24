@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>لعبة ترتيب الحروف للأطفال</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff79c6">
+</head>
+<body class="bg-gradient-to-br from-pink-400 via-purple-300 to-yellow-200">
+<div id="root" class="flex items-center justify-center min-h-screen p-4"></div>
+
+<audio id="win-sound" src="https://www.soundjay.com/human/applause-8.mp3" preload="auto"></audio>
+
+<script type="text/javascript">
+const { useState, useEffect } = React;
+
+function WordScrambleGame() {
+  const wordList = [
+    { word: 'قط', hint: '🐱 صوته "مياو!"' },
+    { word: 'كلب', hint: '🐶 صوته "هوووف!"' },
+    { word: 'شمس', hint: '☀️ تشرق في السماء' },
+    { word: 'سمك', hint: '🐟 يعيش في الماء' },
+    { word: 'شجرة', hint: '🌳 تنمو طويلة' },
+    { word: 'قمر', hint: '🌙 يضيء الليل' },
+    { word: 'نجم', hint: '⭐ يلمع في السماء' },
+    { word: 'طائر', hint: '🐦 يطير عاليًا' },
+    { word: 'ضفدع', hint: '🐸 يصدر صوت "ربرب"' },
+    { word: 'كيك', hint: '🎂 حلوى عيد ميلاد' }
+  ];
+
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [scrambledLetters, setScrambledLetters] = useState([]);
+  const [selectedLetters, setSelectedLetters] = useState([]);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [score, setScore] = useState(0);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [isWrong, setIsWrong] = useState(false);
+
+  const currentWord = wordList[currentWordIndex];
+
+  const scrambleWord = (word) => {
+    let letters;
+    do {
+      letters = word.split('').sort(() => Math.random() - 0.5);
+    } while (letters.join('') === word);
+    return letters.map((letter, index) => ({ letter, id: index }));
+  };
+
+  useEffect(() => {
+    setScrambledLetters(scrambleWord(currentWord.word));
+    setSelectedLetters([]);
+    setIsCorrect(false);
+    setShowCelebration(false);
+    setIsWrong(false);
+  }, [currentWordIndex]);
+
+  const handleLetterClick = (letterObj) => {
+    setSelectedLetters([...selectedLetters, letterObj]);
+    setScrambledLetters(scrambledLetters.filter(l => l.id !== letterObj.id));
+  };
+
+  const handleSelectedClick = (letterObj, index) => {
+    setScrambledLetters([...scrambledLetters, letterObj]);
+    setSelectedLetters(selectedLetters.filter((_, i) => i !== index));
+  };
+
+  const playWinSound = () => {
+    const audio = document.getElementById("win-sound");
+    audio.currentTime = 0;
+    audio.play();
+  };
+
+  const checkAnswer = () => {
+    const answer = selectedLetters.map(l => l.letter).join('');
+    if (answer === currentWord.word) {
+      setIsCorrect(true);
+      setScore(score + 1);
+      setShowCelebration(true);
+      setIsWrong(false);
+      playWinSound();
+
+      setTimeout(() => {
+        setCurrentWordIndex((currentWordIndex + 1) % wordList.length);
+      }, 2000);
+    } else {
+      setIsWrong(true);
+    }
+  };
+
+  const reshuffleLetters = () => {
+    setScrambledLetters(scrambleWord([...scrambledLetters, ...selectedLetters].map(l => l.letter).join('')));
+    setSelectedLetters([]);
+  };
+
+  const resetWord = () => {
+    setScrambledLetters(scrambleWord(currentWord.word));
+    setSelectedLetters([]);
+    setIsCorrect(false);
+    setIsWrong(false);
+  };
+
+  return React.createElement(
+    "div",
+    { className: "max-w-2xl w-full bg-white rounded-3xl shadow-2xl p-8 relative overflow-hidden text-center" },
+    
+    showCelebration &&
+      React.createElement("div", { className: "absolute inset-0 flex items-center justify-center text-8xl animate-bounce" }, "✨🌟🎉✨"),
+
+    React.createElement("h1", { className: "text-4xl font-bold text-pink-600 mb-4" }, "لعبة ترتيب الحروف للأطفال"),
+    
+    React.createElement("p", { className: "text-xl text-gray-700 mb-2" }, "رتبي الحروف لتكوين الكلمة الصحيحة!"),
+    React.createElement("p", { className: "text-3xl mb-2" }, currentWord.hint),
+    React.createElement("p", { className: "text-sm text-gray-500 mb-6" }, `الكلمة ${currentWordIndex + 1} من ${wordList.length}`),
+
+    React.createElement(
+      "div",
+      { className: "bg-blue-50 rounded-2xl p-6 flex justify-center gap-2 flex-wrap mb-6 min-h-[100px]" },
+      selectedLetters.length === 0
+        ? React.createElement("span", { className: "text-gray-400 text-lg" }, "اضغطي على الحروف بالأسفل")
+        : selectedLetters.map((l, i) =>
+            React.createElement("button", {
+              key: i,
+              onClick: () => handleSelectedClick(l, i),
+              className: "w-16 h-16 bg-green-400 text-white text-3xl rounded-xl shadow-lg"
+            }, l.letter)
+          )
+    ),
+
+    React.createElement(
+      "div",
+      { className: "flex justify-center gap-2 flex-wrap mb-6" },
+      scrambledLetters.map((l) =>
+        React.createElement("button", {
+          key: l.id,
+          onClick: () => handleLetterClick(l),
+          className: "w-16 h-16 bg-purple-400 text-white text-3xl rounded-xl shadow-lg"
+        }, l.lette
